@@ -1,12 +1,11 @@
-\documentclass[12pt,a4paper]{report}
+\documentclass[14pt,a4paper]{report}
 
 % ============================================================================
 % PACKAGES
 % ============================================================================
-\usepackage[utf-8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{geometry}
-\geometry{margin=1in}
+\geometry{margin=1.25in, top=1.5in, bottom=1.5in}
 \usepackage{fancyhdr}
 \usepackage{graphicx}
 \usepackage{amsmath}
@@ -27,16 +26,16 @@
 % ============================================================================
 % CONFIGURATION
 % ============================================================================
-\onehalfspacing
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt}
+\setlength{\parindent}{0.5in}
+\setlength{\parskip}{8pt}
+\linespread{1.15}
 
 % Code listing configuration
 \lstset{
     language=Python,
-    basicstyle=\ttfamily\small,
-    keywordstyle=\color{blue},
-    commentstyle=\color{gray},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
     stringstyle=\color{red},
     breaklines=true,
     postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
@@ -45,15 +44,20 @@
     frame=single,
     numbers=left,
     numberstyle=\tiny,
-    backgroundcolor=\color{lightgray!20}
+    backgroundcolor=\color{lightgray!10},
+    captionpos=b,
+    aboveskip=10pt,
+    belowskip=10pt
 }
 
 % Header and Footer
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{Spam Email Detection}
+\fancyhead[L]{\textbf{Spam Email Detection}}
 \fancyhead[R]{\thepage}
-\fancyfoot[C]{May 12, 2026}
+\fancyfoot[C]{\footnotesize May 12, 2026}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
 
 % ============================================================================
 % DOCUMENT START
@@ -64,30 +68,115 @@
 % TITLE PAGE
 % ============================================================================
 \begin{titlepage}
-    \centering
-    \vspace*{\fill}
-    
-    {\LARGE\bfseries Spam Email Detection}\\[12pt]
-    {\Large\bfseries Combined Report}\\[12pt]
-    {\large Assignment 01 \& Assignment 02 Comprehensive Analysis}\\[12pt]
-    
-    \vspace{2cm}
-    
-    {\large\bfseries A Complete Machine Learning Study}\\[12pt]
-    {\large From Data Preprocessing to Model Evaluation}
-    
-    \vspace{3cm}
-    
-    {\large Author: Academic Research}\\[6pt]
-    {\large Date: May 12, 2026}\\[6pt]
-    {\large Institution: Academic Institution}
-    
-    \vspace{3cm}
-    
-    {\large\bfseries Status: Complete \& Comprehensive}\\[12pt]
-    {\large Python 3.12.3 | scikit-learn, pandas, numpy}
-    
-    \vspace*{\fill}
+\begin{center}
+
+\vspace*{0.5cm}
+
+%====================%
+% University/Institution Name
+%====================%
+{\fontsize{20pt}{24pt}\selectfont \textbf{Academic Research Institution}}\\[0.2cm]
+{\fontsize{12pt}{15pt}\selectfont Department of Computer Science and Engineering}
+
+\vspace{1.2cm}
+
+\vspace{0.5cm}
+
+%====================%
+% Title
+%====================%
+{\fontsize{18pt}{22pt}\selectfont \textbf{COMBINED REPORT}}\\[0.5cm]
+
+{\fontsize{13pt}{16pt}\selectfont \textbf{On}}\\[0.4cm]
+
+{\fontsize{17pt}{21pt}\selectfont
+\textbf{Spam Email Detection: Machine Learning Classification}
+}
+
+\vspace{0.5cm}
+
+%====================%
+% Assignment Info
+%====================%
+\begin{tabular}{rl}
+\textbf{Assignment 01} & : Modular \& Improved Classification \\
+\textbf{Assignment 02} & : Decision Tree and Random Forest from Scratch \\
+\end{tabular}
+
+\vspace{2.5cm}
+
+%====================%
+% Project Overview
+%====================%
+{\fontsize{12pt}{15pt}\selectfont
+\textbf{Overview:} A comprehensive machine learning study combining practical implementation with theoretical algorithm understanding. Two complementary approaches to spam email detection using multiple classifiers and ensemble methods.
+}
+
+\vspace{2cm}
+
+%====================%
+% Submission Info
+%====================%
+
+\begin{center}
+\begin{minipage}{0.45\textwidth}
+\centering
+{\fontsize{14pt}{18pt}\selectfont \textbf{Project Details}}\\[0.4cm]
+
+{\fontsize{12pt}{15pt}\selectfont
+Status: Complete\\
+Python Version: 3.12.3\\
+Platform: Linux\\
+Total Pages: Varies
+}
+\end{minipage}
+\hspace{1cm}
+\begin{minipage}{0.45\textwidth}
+\centering
+{\fontsize{14pt}{18pt}\selectfont \textbf{Technologies Used}}\\[0.4cm]
+
+{\fontsize{12pt}{15pt}\selectfont
+scikit-learn\\
+pandas, numpy\\
+matplotlib, seaborn\\
+NLTK
+}
+\end{minipage}
+\end{center}
+
+\vspace{2.5cm}
+
+%====================%
+% Key Features
+%====================%
+{\fontsize{14pt}{18pt}\selectfont \textbf{Key Components:}}\\[0.3cm]
+
+{\fontsize{12pt}{15pt}\selectfont
+\begin{tabular}{l}
+$\checkmark$ Data Preprocessing and Feature Engineering \\
+$\checkmark$ Multiple Classifier Comparison (Naive Bayes, Logistic Regression, SVM) \\
+$\checkmark$ Decision Tree Implementation from Scratch \\
+$\checkmark$ Random Forest Implementation from Scratch \\
+$\checkmark$ Comprehensive Performance Evaluation \\
+$\checkmark$ Mathematical Analysis and Visualizations \\
+\end{tabular}
+}
+
+\vspace{2cm}
+
+{\fontsize{12pt}{15pt}\selectfont
+\textbf{Submission Date:} May 12, 2026
+}
+
+\vspace{0.5cm}
+
+{\fontsize{12pt}{15pt}\selectfont
+\textbf{Report Status:} Complete \& Comprehensive
+}
+
+\vspace{0.5cm}
+
+\end{center}
 \end{titlepage}
 
 % ============================================================================
