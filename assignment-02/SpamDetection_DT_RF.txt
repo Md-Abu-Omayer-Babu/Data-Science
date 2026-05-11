@@ -1,0 +1,520 @@
+# Spam Email Detection: Decision Tree and Random Forest - from-scratch Implementation
+# Code from SpamDetection_DT_RF.ipynb
+# =======================================================================================
+
+# 1. Import Required Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from collections import Counter
+import re
+import math
+import random
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
+
+# Set random seed for reproducibility
+random.seed(42)
+np.random.seed(42)
+
+
+# 2. Load and Explore the Dataset
+# Load the dataset from assignment-01
+df = pd.read_csv('../assignment-01/emails.csv')
+
+print("Dataset Shape:", df.shape)
+print("\nFirst 10 rows:")
+print(df.head(10))
+print("\nDataset Info:")
+print(df.info())
+print("\nSpam Distribution:")
+print(df['spam'].value_counts())
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+
+# 3. Data Preprocessing and Feature Extraction (From Scratch)
+# Text preprocessing function
+def preprocess_text(text):
+    """Clean text: lowercase, remove punctuation, remove stopwords"""
+    text = text.lower()
+    text = re.sub(r'[^a-zA-Z ]', '', text)
+    words = text.split()
+    return words
+
+# Manual stopwords list
+stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from',
+             'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did',
+             'will', 'would', 'should', 'could', 'may', 'might', 'must', 'can', 'as', 'if', 'this', 'that',
+             'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them'}
+
+def remove_stopwords(words):
+    """Remove stopwords from word list"""
+    return [w for w in words if w not in stopwords and len(w) > 2]
+
+# Build vocabulary from training data (we'll do this after train-test split)
+# For now, preprocess all texts
+df['words'] = df['text'].apply(preprocess_text)
+df['clean_words'] = df['words'].apply(remove_stopwords)
+
+print("Sample cleaned text:")
+for i in range(3):
+    print(f"Original: {df['text'].iloc[i]}")
+    print(f"Cleaned: {df['clean_words'].iloc[i]}\n")
+
+
+# Split data first for proper vocabulary building
+y = df['spam'].values
+X_temp = df['clean_words'].values
+
+X_train_words, X_test_words, y_train, y_test = train_test_split(
+    X_temp, y, test_size=0.2, random_state=42
+)
+
+# Build vocabulary from training data ONLY
+vocab = set()
+for words_list in X_train_words:
+    vocab.update(words_list)
+
+vocab = sorted(list(vocab))
+word_to_idx = {word: idx for idx, word in enumerate(vocab)}
+
+print(f"Vocabulary size: {len(vocab)}")
+print(f"Training set size: {len(X_train_words)}")
+print(f"Test set size: {len(X_test_words)}")
+
+# Convert text to bag-of-words vectors manually
+def text_to_bow_vector(words_list, vocab_dict):
+    """Convert words list to bag-of-words vector"""
+    vector = np.zeros(len(vocab_dict))
+    word_count = {}
+    for word in words_list:
+        word_count[word] = word_count.get(word, 0) + 1
+    
+    for word, count in word_count.items():
+        if word in vocab_dict:
+            vector[vocab_dict[word]] = count
+    return vector
+
+# Create feature vectors
+X_train = np.array([text_to_bow_vector(words, word_to_idx) for words in X_train_words])
+X_test = np.array([text_to_bow_vector(words, word_to_idx) for words in X_test_words])
+
+print(f"\nFeature matrix shape - Train: {X_train.shape}, Test: {X_test.shape}")
+print(f"Sample feature vector (first 10 features): {X_train[0][:10]}")
+
+
+# 4. Decision Tree Classifier from Scratch
+class Node:
+    """A node in the decision tree"""
+    def __init__(self, feature=None, threshold=None, left=None, right=None, value=None):
+        self.feature = feature          # Index of feature to split on
+        self.threshold = threshold      # Threshold value for split
+        self.left = left                # Left subtree
+        self.right = right              # Right subtree
+        self.value = value              # Class prediction if leaf node
+
+class DecisionTree:
+    """Decision Tree Classifier - from scratch implementation"""
+    
+    def __init__(self, max_depth=None, min_samples_split=2):
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.tree = None
+    
+    def _entropy(self, y):
+        """Calculate entropy of labels"""
+        counts = np.bincount(y)
+        probabilities = counts / len(y)
+        entropy = -np.sum([p * np.log2(p) for p in probabilities if p > 0])
+        return entropy
+    
+    def _information_gain(self, parent, left_child, right_child):
+        """Calculate information gain from a split"""
+        n = len(parent)
+        n_left = len(left_child)
+        n_right = len(right_child)
+        
+        if n_left == 0 or n_right == 0:
+            return 0
+        
+        parent_entropy = self._entropy(parent)
+        left_entropy = self._entropy(left_child)
+        right_entropy = self._entropy(right_child)
+        
+        weighted_child_entropy = (n_left / n) * left_entropy + (n_right / n) * right_entropy
+        ig = parent_entropy - weighted_child_entropy
+        return ig
+    
+    def _best_split(self, X, y):
+        """Find the best feature and threshold to split on"""
+        best_gain = -1
+        best_feature = None
+        best_threshold = None
+        
+        for feature_idx in range(X.shape[1]):
+            feature_values = X[:, feature_idx]
+            thresholds = np.unique(feature_values)
+            
+            for threshold in thresholds:
+                # Split
+                left_mask = feature_values <= threshold
+                right_mask = ~left_mask
+                
+                if np.sum(left_mask) < self.min_samples_split or np.sum(right_mask) < self.min_samples_split:
+                    continue
+                
+                # Information gain
+                ig = self._information_gain(y, y[left_mask], y[right_mask])
+                
+                if ig > best_gain:
+                    best_gain = ig
+                    best_feature = feature_idx
+                    best_threshold = threshold
+        
+        return best_feature, best_threshold
+    
+    def _build_tree(self, X, y, depth=0):
+        """Recursively build the decision tree"""
+        n_samples = X.shape[0]
+        n_classes = len(np.unique(y))
+        
+        # Stopping criteria
+        if (depth >= self.max_depth if self.max_depth else False) or \
+           n_classes == 1 or \
+           n_samples < self.min_samples_split:
+            # Leaf node - return majority class
+            leaf_value = np.bincount(y).argmax()
+            return Node(value=leaf_value)
+        
+        # Find best split
+        best_feature, best_threshold = self._best_split(X, y)
+        
+        if best_feature is None:
+            leaf_value = np.bincount(y).argmax()
+            return Node(value=leaf_value)
+        
+        # Split dataset
+        left_mask = X[:, best_feature] <= best_threshold
+        right_mask = ~left_mask
+        
+        # Recursively build left and right subtrees
+        left_subtree = self._build_tree(X[left_mask], y[left_mask], depth + 1)
+        right_subtree = self._build_tree(X[right_mask], y[right_mask], depth + 1)
+        
+        return Node(feature=best_feature, threshold=best_threshold, 
+                   left=left_subtree, right=right_subtree)
+    
+    def fit(self, X, y):
+        """Build decision tree classifier"""
+        self.tree = self._build_tree(X, y)
+        return self
+    
+    def _predict_sample(self, x, node):
+        """Predict class for a single sample"""
+        if node.value is not None:
+            return node.value
+        
+        if x[node.feature] <= node.threshold:
+            return self._predict_sample(x, node.left)
+        else:
+            return self._predict_sample(x, node.right)
+    
+    def predict(self, X):
+        """Predict class labels for samples"""
+        return np.array([self._predict_sample(x, self.tree) for x in X])
+
+print("Decision Tree Classifier implementation complete!")
+
+
+# 5. Random Forest Classifier from Scratch
+class RandomForest:
+    """Random Forest Classifier - from scratch implementation"""
+    
+    def __init__(self, n_trees=10, max_depth=None, min_samples_split=2, 
+                 max_features=None, bootstrap=True):
+        self.n_trees = n_trees
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.max_features = max_features
+        self.bootstrap = bootstrap
+        self.trees = []
+    
+    def _bootstrap_sample(self, X, y):
+        """Create a bootstrap sample of the data"""
+        n_samples = X.shape[0]
+        indices = np.random.choice(n_samples, n_samples, replace=True)
+        return X[indices], y[indices]
+    
+    def _select_features(self, n_features):
+        """Randomly select features for splitting at each node"""
+        if self.max_features is None:
+            return list(range(n_features))
+        else:
+            n_select = min(self.max_features, n_features)
+            return np.random.choice(n_features, n_select, replace=False).tolist()
+    
+    def fit(self, X, y):
+        """Build random forest by training multiple decision trees"""
+        self.trees = []
+        for i in range(self.n_trees):
+            if self.bootstrap:
+                X_sample, y_sample = self._bootstrap_sample(X, y)
+            else:
+                X_sample, y_sample = X, y
+            
+            # Create and train decision tree
+            dt = DecisionTree(max_depth=self.max_depth, 
+                            min_samples_split=self.min_samples_split)
+            dt.fit(X_sample, y_sample)
+            self.trees.append(dt)
+        
+        return self
+    
+    def predict(self, X):
+        """Predict by majority voting from all trees"""
+        predictions = np.array([tree.predict(X) for tree in self.trees])
+        # Voting: each column gets majority vote
+        final_predictions = np.zeros(X.shape[0], dtype=int)
+        for i in range(X.shape[0]):
+            votes = predictions[:, i]
+            final_predictions[i] = np.bincount(votes).argmax()
+        
+        return final_predictions
+
+print("Random Forest Classifier implementation complete!")
+
+
+# 6. Train Both Models
+import time
+
+print("=" * 60)
+print("TRAINING MODELS")
+print("=" * 60)
+
+# Train Decision Tree
+print("\n1. Training Decision Tree Classifier...")
+start_time = time.time()
+dt_classifier = DecisionTree(max_depth=15, min_samples_split=2)
+dt_classifier.fit(X_train, y_train)
+dt_train_time = time.time() - start_time
+print(f"   Decision Tree trained in {dt_train_time:.4f} seconds")
+
+# Train Random Forest
+print("\n2. Training Random Forest Classifier (10 trees)...")
+start_time = time.time()
+rf_classifier = RandomForest(n_trees=10, max_depth=15, min_samples_split=2, bootstrap=True)
+rf_classifier.fit(X_train, y_train)
+rf_train_time = time.time() - start_time
+print(f"   Random Forest trained in {rf_train_time:.4f} seconds")
+
+print("\n" + "=" * 60)
+print("Training complete!")
+print("=" * 60)
+
+
+# 7. Evaluate Model Performance
+# Make predictions
+print("Making predictions on test set...")
+dt_pred = dt_classifier.predict(X_test)
+rf_pred = rf_classifier.predict(X_test)
+
+# Evaluate Decision Tree
+print("\n" + "=" * 60)
+print("DECISION TREE EVALUATION")
+print("=" * 60)
+dt_accuracy = accuracy_score(y_test, dt_pred)
+dt_precision = precision_score(y_test, dt_pred)
+dt_recall = recall_score(y_test, dt_pred)
+dt_f1 = f1_score(y_test, dt_pred)
+dt_cm = confusion_matrix(y_test, dt_pred)
+
+print(f"Accuracy:  {dt_accuracy:.4f}")
+print(f"Precision: {dt_precision:.4f}")
+print(f"Recall:    {dt_recall:.4f}")
+print(f"F1-Score:  {dt_f1:.4f}")
+print(f"\nConfusion Matrix:\n{dt_cm}")
+print(f"\nClassification Report:")
+print(classification_report(y_test, dt_pred, target_names=['Ham', 'Spam']))
+
+# Evaluate Random Forest
+print("\n" + "=" * 60)
+print("RANDOM FOREST EVALUATION")
+print("=" * 60)
+rf_accuracy = accuracy_score(y_test, rf_pred)
+rf_precision = precision_score(y_test, rf_pred)
+rf_recall = recall_score(y_test, rf_pred)
+rf_f1 = f1_score(y_test, rf_pred)
+rf_cm = confusion_matrix(y_test, rf_pred)
+
+print(f"Accuracy:  {rf_accuracy:.4f}")
+print(f"Precision: {rf_precision:.4f}")
+print(f"Recall:    {rf_recall:.4f}")
+print(f"F1-Score:  {rf_f1:.4f}")
+print(f"\nConfusion Matrix:\n{rf_cm}")
+print(f"\nClassification Report:")
+print(classification_report(y_test, rf_pred, target_names=['Ham', 'Spam']))
+
+
+# 8. Performance Comparison
+# Create comparison dataframe
+comparison_data = {
+    'Metric': ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'Training Time (s)'],
+    'Decision Tree': [
+        f"{dt_accuracy:.4f}",
+        f"{dt_precision:.4f}",
+        f"{dt_recall:.4f}",
+        f"{dt_f1:.4f}",
+        f"{dt_train_time:.4f}"
+    ],
+    'Random Forest': [
+        f"{rf_accuracy:.4f}",
+        f"{rf_precision:.4f}",
+        f"{rf_recall:.4f}",
+        f"{rf_f1:.4f}",
+        f"{rf_train_time:.4f}"
+    ]
+}
+
+comparison_df = pd.DataFrame(comparison_data)
+
+print("\n" + "=" * 80)
+print("PERFORMANCE COMPARISON: DECISION TREE vs RANDOM FOREST")
+print("=" * 80)
+print(comparison_df.to_string(index=False))
+print("=" * 80)
+
+# Calculate improvements
+print("\nRANDOM FOREST IMPROVEMENTS over DECISION TREE:")
+print(f"  Accuracy:  {((rf_accuracy - dt_accuracy) / dt_accuracy * 100):+.2f}%")
+print(f"  Precision: {((rf_precision - dt_precision) / dt_precision * 100):+.2f}%")
+print(f"  Recall:    {((rf_recall - dt_recall) / dt_recall * 100):+.2f}%")
+print(f"  F1-Score:  {((rf_f1 - dt_f1) / dt_f1 * 100):+.2f}%")
+
+
+# 9. Visualize Results
+# Create a figure with subplots for confusion matrices
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Decision Tree Confusion Matrix
+sns.heatmap(dt_cm, annot=True, fmt='d', cmap='Blues', ax=axes[0], 
+            cbar=False, xticklabels=['Ham', 'Spam'], yticklabels=['Ham', 'Spam'])
+axes[0].set_title('Decision Tree - Confusion Matrix', fontsize=14, fontweight='bold')
+axes[0].set_xlabel('Predicted')
+axes[0].set_ylabel('Actual')
+
+# Random Forest Confusion Matrix
+sns.heatmap(rf_cm, annot=True, fmt='d', cmap='Greens', ax=axes[1], 
+            cbar=False, xticklabels=['Ham', 'Spam'], yticklabels=['Ham', 'Spam'])
+axes[1].set_title('Random Forest - Confusion Matrix', fontsize=14, fontweight='bold')
+axes[1].set_xlabel('Predicted')
+axes[1].set_ylabel('Actual')
+
+plt.tight_layout()
+plt.show()
+
+
+# Performance metrics comparison
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
+dt_scores = [dt_accuracy, dt_precision, dt_recall, dt_f1]
+rf_scores = [rf_accuracy, rf_precision, rf_recall, rf_f1]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+x = np.arange(len(metrics))
+width = 0.35
+
+bars1 = ax.bar(x - width/2, dt_scores, width, label='Decision Tree', color='skyblue', edgecolor='black')
+bars2 = ax.bar(x + width/2, rf_scores, width, label='Random Forest', color='lightgreen', edgecolor='black')
+
+ax.set_ylabel('Score', fontsize=12, fontweight='bold')
+ax.set_title('Model Performance Comparison', fontsize=14, fontweight='bold')
+ax.set_xticks(x)
+ax.set_xticklabels(metrics)
+ax.legend(fontsize=11)
+ax.set_ylim([0, 1.1])
+ax.grid(axis='y', alpha=0.3)
+
+# Add value labels on bars
+for bars in [bars1, bars2]:
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height,
+                f'{height:.3f}', ha='center', va='bottom', fontsize=10)
+
+plt.tight_layout()
+plt.show()
+
+
+# Test set statistics
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+# Class distribution in test set
+class_counts = np.bincount(y_test)
+colors_pie = ['#FF9999', '#66B2FF']
+axes[0].pie(class_counts, labels=['Ham', 'Spam'], autopct='%1.1f%%', 
+            colors=colors_pie, startangle=90, textprops={'fontsize': 11})
+axes[0].set_title('Test Set Class Distribution', fontsize=12, fontweight='bold')
+
+# Model comparison - Accuracy vs Training Time (trade-off)
+models = ['Decision Tree', 'Random Forest']
+accuracies = [dt_accuracy, rf_accuracy]
+times = [dt_train_time, rf_train_time]
+
+ax2 = axes[1]
+ax2_twin = ax2.twinx()
+
+bars = ax2.bar(models, accuracies, color=['skyblue', 'lightgreen'], 
+               edgecolor='black', width=0.6, label='Accuracy')
+line = ax2_twin.plot(models, times, 'ro-', linewidth=2, markersize=8, label='Training Time')
+
+ax2.set_ylabel('Accuracy', fontsize=11, fontweight='bold', color='black')
+ax2_twin.set_ylabel('Training Time (seconds)', fontsize=11, fontweight='bold', color='red')
+ax2.set_title('Accuracy vs Training Time', fontsize=12, fontweight='bold')
+ax2.set_ylim([0, 1.1])
+ax2.tick_params(axis='y', labelcolor='black')
+ax2_twin.tick_params(axis='y', labelcolor='red')
+ax2.grid(axis='y', alpha=0.3)
+
+# Add value labels
+for i, (model, acc, time) in enumerate(zip(models, accuracies, times)):
+    ax2.text(i, acc + 0.02, f'{acc:.3f}', ha='center', fontsize=10, fontweight='bold')
+    ax2_twin.text(i, time + 0.01, f'{time:.4f}s', ha='center', fontsize=9, color='red')
+
+plt.tight_layout()
+plt.show()
+
+
+# =======================================================================================
+# SUMMARY & KEY FINDINGS
+# =======================================================================================
+# 
+# Model Implementation:
+# ✅ Decision Tree Classifier - Implemented from scratch with:
+#    - Information Gain calculation using entropy
+#    - Recursive tree building with feature selection
+#    - Majority voting for predictions
+#
+# ✅ Random Forest Classifier - Implemented from scratch with:
+#    - Bootstrap sampling for training sets
+#    - Multiple independent decision trees
+#    - Majority voting ensemble prediction
+#
+# Key Results:
+# - Best Model: Random Forest generally outperforms Decision Tree
+# - Trade-off: Random Forest takes longer to train but achieves better accuracy
+# - Generalization: Ensemble methods (Random Forest) reduce overfitting
+#
+# Dataset Insights:
+# - Total samples: (see printed output)
+# - Training samples: (see printed output)
+# - Test samples: (see printed output)
+# - Features: Bag-of-words vectors
+# - Spam ratio: (see printed output)
+#
+# Recommendations:
+# 1. Use Random Forest for better accuracy (reduced variance through ensemble)
+# 2. Consider hyperparameter tuning (tree depth, number of trees)
+# 3. Try different preprocessing or feature extraction methods for further improvements
+# =======================================================================================

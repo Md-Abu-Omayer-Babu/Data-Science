@@ -1,0 +1,267 @@
+# Spam Email Detection - Code from SpamEmail.ipynb
+# ===================================================
+
+# 1. Data Loading
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+
+# Function to load data
+def load_data(filepath):
+    """Load the email dataset from a CSV file."""
+    df = pd.read_csv(filepath)
+    return df
+
+# Load the dataset (update path as needed)
+df = load_data("/content/spam_dataset/emails.csv")
+df.head()
+
+
+# 2. Preprocessing
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk.corpus import stopwords
+import nltk
+nltk.download('stopwords')
+
+# Preprocessing function
+def preprocess_text(text):
+    """Lowercase, remove punctuation, and stopwords."""
+    text = text.lower()
+    text = re.sub(r'[^a-zA-Z ]', '', text)
+    words = text.split()
+    stop_words = set(stopwords.words('english'))
+    words = [w for w in words if w not in stop_words]
+    return ' '.join(words)
+
+def apply_preprocessing(df, text_col='text'):
+    df['clean_text'] = df[text_col].apply(preprocess_text)
+    return df
+
+# Apply preprocessing
+df = apply_preprocessing(df)
+df[['text', 'clean_text']].head()
+
+
+# 3. Feature Engineering
+# Feature engineering functions
+def add_text_features(df, text_col='clean_text'):
+    df['text_length'] = df[text_col].apply(len)
+    df['word_count'] = df[text_col].apply(lambda x: len(x.split()))
+    return df
+
+# Add features
+df = add_text_features(df)
+df[['clean_text', 'text_length', 'word_count']].head()
+
+
+# 4. Model Training
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import LinearSVC
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
+
+# Prepare features and target
+def prepare_features(df):
+    tfidf = TfidfVectorizer()
+    X_tfidf = tfidf.fit_transform(df['clean_text'])
+    # Combine engineered features
+    X = np.hstack((X_tfidf.toarray(),
+                  df[['text_length', 'word_count']].values))
+    y = df['spam'].values
+    return X, y, tfidf
+
+X, y, tfidf_vectorizer = prepare_features(df)
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train models
+def train_models(X_train, y_train):
+    models = {
+        'Naive Bayes': MultinomialNB(),
+        'Logistic Regression': LogisticRegression(max_iter=1000),
+        'SVM': LinearSVC(max_iter=1000)
+    }
+    for name, model in models.items():
+        model.fit(X_train, y_train)
+    return models
+
+models = train_models(X_train, y_train)
+
+
+# 5. Evaluation
+# Evaluation functions
+def evaluate_model(model, X_test, y_test):
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    prec = precision_score(y_test, y_pred)
+    rec = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred)
+    return {'accuracy': acc, 'precision': prec, 'recall': rec, 'f1': f1, 'cm': cm, 'y_pred': y_pred}
+
+def plot_confusion_matrix(cm, title):
+    plt.figure(figsize=(5,4))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title(title)
+    plt.show()
+
+# Evaluate all models
+results = {}
+for name, model in models.items():
+    results[name] = evaluate_model(model, X_test, y_test)
+
+# Show metrics
+eval_df = pd.DataFrame({name: {k: v for k, v in res.items() if k != 'cm' and k != 'y_pred'} for name, res in results.items()}).T
+print(eval_df)
+
+# Plot confusion matrices
+for name, res in results.items():
+    plot_confusion_matrix(res['cm'], f'{name} Confusion Matrix')
+
+
+# 6. Visualize class distribution
+plt.figure(figsize=(6,4))
+sns.countplot(x=df['spam'])
+plt.title('Spam vs Ham Emails')
+plt.xlabel('Spam (1 = Spam, 0 = Ham)')
+plt.ylabel('Count')
+plt.show()
+
+
+# ===================================================
+# Additional Code for Loading and Testing
+# ===================================================
+
+import zipfile
+
+zip_path = "/content/SPAM Email Dataset.zip"
+
+with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    zip_ref.extractall("/content/spam_dataset")
+
+print("Dataset extracted successfully")
+
+
+import os
+
+os.listdir("/content/spam_dataset")
+
+
+df = pd.read_csv("/content/spam_dataset/emails.csv")
+
+df.head()
+
+
+df.info()
+
+
+df['spam'].value_counts()
+
+
+plt.figure(figsize=(6,4))
+sns.countplot(x=df['spam'])
+
+plt.title("Spam vs Ham Emails")
+plt.xlabel("Spam (1 = Spam, 0 = Ham)")
+plt.ylabel("Count")
+
+plt.show()
+
+
+df['length'] = df['text'].apply(len)
+
+df.head()
+
+
+plt.figure(figsize=(8,5))
+
+sns.histplot(df['length'], bins=50)
+
+plt.title("Email Length Distribution")
+plt.xlabel("Email Length")
+plt.ylabel("Frequency")
+
+plt.show()
+
+
+vectorizer = CountVectorizer()
+
+X = vectorizer.fit_transform(df['text'])
+y = df['spam']
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+
+model = MultinomialNB()
+
+model.fit(X_train, y_train)
+
+
+y_pred = model.predict(X_test)
+
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+
+
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(6,4))
+
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+
+plt.show()
+
+
+print(classification_report(y_test, y_pred))
+
+
+import re
+
+# clean function
+def clean_text(text):
+    text = text.lower()
+    text = re.sub(r'[^a-zA-Z ]', '', text)
+    return text
+
+# prediction function
+def predict_email(text):
+    text = clean_text(text)
+    vec = vectorizer.transform([text])
+    pred = model.predict(vec)[0]
+    return "SPAM" if pred == 1 else "NOT SPAM"
+
+# TEST EMAILS
+emails = [
+    "Congratulations! You have been selected for a $10,000 reward. Claim now!",
+    "Dear student, your assignment submission deadline is tomorrow.",
+    "Your Netflix account has been suspended. Update your payment details immediately.",
+    "Can we reschedule our meeting to 3 PM today?",
+    "Limited time offer! Buy 1 get 1 free on all products. Shop now!",
+    "Hey, are you coming to the group study session tonight?",
+    "You have won a free ticket to Dubai. Click to confirm your booking.",
+    "Please find the attached project report for review.",
+    "Urgent! Your email storage is full. Upgrade your account now.",
+    "Let's meet at the cafeteria after class."
+]
+
+# run predictions
+for email in emails:
+    print(predict_email(email))
