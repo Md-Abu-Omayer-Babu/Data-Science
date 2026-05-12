@@ -190,316 +190,51 @@ Spam email detection is a critical component of modern email security systems. T
 
 The implementation emphasizes code modularity, reusability, and best practices in machine learning workflows.
 
-\section{Code Implementation}
+\section{Code Implementation and Results}
 
-\subsection{1. Data Loading and Exploration}
+\subsection{1. Dataset Loading and Exploration}
 
-\begin{lstlisting}
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-
-# Function to load data
-def load_data(filepath):
-    """Load the email dataset from a CSV file."""
-    df = pd.read_csv(filepath)
-    return df
-
-# Load the dataset
-df = load_data("emails.csv")
-df.head()
-df.info()
-df['spam'].value_counts()
-\end{lstlisting}
-
-\subsection{2. Text Preprocessing}
-
-\begin{lstlisting}
-import re
-from sklearn.feature_extraction.text import TfidfVectorizer
-from nltk.corpus import stopwords
-import nltk
-nltk.download('stopwords')
-
-# Preprocessing function
-def preprocess_text(text):
-    """Lowercase, remove punctuation, and stopwords."""
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z ]', '', text)
-    words = text.split()
-    stop_words = set(stopwords.words('english'))
-    words = [w for w in words if w not in stop_words]
-    return ' '.join(words)
-
-def apply_preprocessing(df, text_col='text'):
-    df['clean_text'] = df[text_col].apply(preprocess_text)
-    return df
-
-# Apply preprocessing
-df = apply_preprocessing(df)
-\end{lstlisting}
-
-\textbf{Preprocessing Steps:}
-\begin{itemize}
-    \item Convert text to lowercase for consistency
-    \item Remove punctuation and special characters using regex
-    \item Tokenize text into words
-    \item Remove English stopwords (the, a, is, etc.)
-    \item Retain only meaningful words
-\end{itemize}
-
-\subsection{3. Feature Engineering}
-
-\begin{lstlisting}
-def add_text_features(df, text_col='clean_text'):
-    """Extract additional text-based features"""
-    df['text_length'] = df[text_col].apply(len)
-    df['word_count'] = df[text_col].apply(lambda x: len(x.split()))
-    return df
-
-# Add features
-df = add_text_features(df)
-\end{lstlisting}
-
-\textbf{Features Created:}
-\begin{itemize}
-    \item \textbf{Text Length:} Total number of characters in cleaned text
-    \item \textbf{Word Count:} Number of words after preprocessing
-\end{itemize}
-
-\subsection{4. Feature Extraction - TF-IDF Vectorization}
-
-\begin{lstlisting}
-def prepare_features(df):
-    """Convert text to TF-IDF vectors and combine features"""
-    tfidf = TfidfVectorizer()
-    X_tfidf = tfidf.fit_transform(df['clean_text'])
-    
-    # Combine TF-IDF with engineered features
-    X = np.hstack((X_tfidf.toarray(),
-                  df[['text_length', 'word_count']].values))
-    y = df['spam'].values
-    return X, y, tfidf
-
-X, y, tfidf_vectorizer = prepare_features(df)
-
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-\end{lstlisting}
-
-\textbf{Feature Engineering Details:}
-\begin{itemize}
-    \item \textbf{TF-IDF} (Term Frequency-Inverse Document Frequency):
-    \begin{itemize}
-        \item Captures importance of words in documents
-        \item Down-weights common words across all emails
-        \item Results in sparse matrix of word frequencies
-    \end{itemize}
-    \item \textbf{Combined Features:} TF-IDF vectors + text statistics
-\end{itemize}
-
-\subsection{5. Model Training}
-
-\begin{lstlisting}
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import LinearSVC
-
-def train_models(X_train, y_train):
-    """Train three different classifiers"""
-    models = {
-        'Naive Bayes': MultinomialNB(),
-        'Logistic Regression': LogisticRegression(max_iter=1000),
-        'SVM': LinearSVC(max_iter=1000)
-    }
-    for name, model in models.items():
-        model.fit(X_train, y_train)
-    return models
-
-models = train_models(X_train, y_train)
-\end{lstlisting}
-
-\textbf{Model Algorithms:}
-
-\begin{enumerate}
-    \item \textbf{Multinomial Naive Bayes:}
-    \begin{itemize}
-        \item Based on Bayes' theorem: $P(\text{Spam|Features}) = \frac{P(\text{Features|Spam}) \times P(\text{Spam})}{P(\text{Features})}$
-        \item Assumes feature independence (naive assumption)
-        \item Efficient and works well with text classification
-    \end{itemize}
-    
-    \item \textbf{Logistic Regression:}
-    \begin{itemize}
-        \item Linear classifier using logistic function
-        \item Probability-based predictions
-        \item Easy to interpret and efficient
-    \end{itemize}
-    
-    \item \textbf{Support Vector Machine (SVM):}
-    \begin{itemize}
-        \item Finds optimal hyperplane to maximize margin between classes
-        \item LinearSVC for linear separation
-        \item Powerful for high-dimensional feature spaces
-    \end{itemize}
-\end{enumerate}
-
-\subsection{6. Model Evaluation}
-
-\begin{lstlisting}
-from sklearn.metrics import (accuracy_score, precision_score, 
-                            recall_score, f1_score, confusion_matrix)
-
-def evaluate_model(model, X_test, y_test):
-    """Evaluate model performance using multiple metrics"""
-    y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    prec = precision_score(y_test, y_pred)
-    rec = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
-    cm = confusion_matrix(y_test, y_pred)
-    return {
-        'accuracy': acc, 'precision': prec, 
-        'recall': rec, 'f1': f1, 'cm': cm, 'y_pred': y_pred
-    }
-
-# Evaluate all models
-results = {}
-for name, model in models.items():
-    results[name] = evaluate_model(model, X_test, y_test)
-\end{lstlisting}
-
-\textbf{Evaluation Metrics:}
-\begin{itemize}
-    \item \textbf{Accuracy:} $\frac{TP + TN}{TP + TN + FP + FN}$ --- Overall correctness
-    \item \textbf{Precision:} $\frac{TP}{TP + FP}$ --- Among spam predictions, how many were correct
-    \item \textbf{Recall:} $\frac{TP}{TP + FN}$ --- Among actual spam, how many were detected
-    \item \textbf{F1-Score:} $2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$ --- Harmonic mean
-\end{itemize}
-
-\subsection{7. Email Classification Testing}
-
-\begin{lstlisting}
-def clean_text(text):
-    """Clean text for prediction"""
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z ]', '', text)
-    return text
-
-def predict_email(text):
-    """Predict if email is spam or not"""
-    text = clean_text(text)
-    vec = vectorizer.transform([text])
-    pred = model.predict(vec)[0]
-    return "SPAM" if pred == 1 else "NOT SPAM"
-
-# Test emails
-test_emails = [
-    "Congratulations! You have been selected for reward",
-    "Dear student, assignment deadline is tomorrow",
-    # ... more test emails
-]
-
-for email in test_emails:
-    print(f"{email[:50]}... -> {predict_email(email)}")
-\end{lstlisting}
-
-\section{Results - Assignment 01}
-
-\subsection{Dataset Overview}
-
-\begin{table}[H]
-\centering
-\caption{Dataset Statistics - Assignment 01}
-\begin{tabular}{|l|r|}
-\hline
-\textbf{Metric} & \textbf{Value} \\
-\hline
-Total Emails & 5728 \\
-Ham (0) & 4360 (76.1\%) \\
-Spam (1) & 1368 (23.9\%) \\
-Training Set & 4582 emails (80\%) \\
-Test Set & 1146 emails (20\%) \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Model Performance Comparison}
-
-\begin{table}[H]
-\centering
-\caption{Model Performance Metrics - Assignment 01}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Metric} & \textbf{Naive Bayes} & \textbf{Logistic Reg.} & \textbf{SVM} \\
-\hline
-Accuracy & 99.12\% & N/A & N/A \\
-Precision & 100.0\% & N/A & N/A \\
-Recall & 99.0\% & N/A & N/A \\
-F1-Score & 99.5\% & N/A & N/A \\
-\hline
-\multicolumn{4}{|l|}{*Naive Bayes implemented and tested with CountVectorizer for feature extraction} \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Visualizations}
-
-% ============================================================================
-% IMPORTANT: REPLACE THIS WITH YOUR ACTUAL GRAPH SCREENSHOT
-% ============================================================================
 \begin{figure}[H]
 \centering
-\fbox{\begin{minipage}{0.8\linewidth}
-    \textbf{GRAPH 1: Class Distribution (Spam vs Ham)}\\
-    \vspace{4cm}
-    \% INSERT: Screenshot of countplot showing Spam vs Ham distribution \\
-    \% File: assignment-01/spam_vs_ham_distribution.png
-    \vspace{0.5cm}
-\end{minipage}}
-\caption{Spam vs Ham Emails Distribution in Assignment 01}
+\includegraphics[width=0.9\textwidth]{assignment-01-1.png}
+\caption{Dataset Overview - Data Loading, Head, Info, and Class Distribution}
+\label{fig:a1_dataset}
+\end{figure}
+
+\subsection{2. Class Distribution Analysis}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-01-2.png}
+\caption{Spam vs Ham Emails Distribution - Bar Chart (4360 Ham vs 1368 Spam)}
 \label{fig:a1_distribution}
 \end{figure}
 
-\textbf{To insert actual graph:} Replace the box above with:
-\begin{lstlisting}
-\includegraphics[width=0.8\textwidth]{path/to/graph1.png}
-\end{lstlisting}
+\subsection{3. Email Length Distribution}
 
-% ============================================================================
-% GRAPH 2: Email Length Distribution
-% ============================================================================
 \begin{figure}[H]
 \centering
-\fbox{\begin{minipage}{0.8\linewidth}
-    \textbf{GRAPH 2: Email Length Distribution}\\
-    \vspace{4cm}
-    \% INSERT: Screenshot of histogram showing email length distribution \\
-    \% File: assignment-01/email_length_distribution.png
-    \vspace{0.5cm}
-\end{minipage}}
-\caption{Email Length Distribution - Spam vs Ham}
+\includegraphics[width=0.9\textwidth]{assignment-01-3.png}
+\caption{Email Length Distribution Histogram - Right-Skewed Pattern with Peak at 0-1000 Characters}
 \label{fig:a1_length}
 \end{figure}
 
-% ============================================================================
-% GRAPH 3: Confusion Matrices
-% ============================================================================
+\subsection{4. Model Performance - Confusion Matrix}
+
 \begin{figure}[H]
 \centering
-\fbox{\begin{minipage}{0.8\linewidth}
-    \textbf{GRAPH 3: Confusion Matrices - Model Comparison}\\
-    \vspace{4cm}
-    \% INSERT: Screenshot showing 3 confusion matrices (NB, LogReg, SVM) \\
-    \% File: assignment-01/confusion_matrices.png
-    \vspace{0.5cm}
-\end{minipage}}
-\caption{Confusion Matrices for All Three Models - Assignment 01}
+\includegraphics[width=0.9\textwidth]{assignment-01-4.png}
+\caption{Confusion Matrix - Multinomial Naive Bayes Performance (848 TN, 8 FP, 2 FN, 288 TP)}
 \label{fig:a1_confusion}
+\end{figure}
+
+\subsection{5. Classification Report and Test Predictions}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-01-5.png}
+\caption{Classification Report and Email Test Predictions - 99.13\% Accuracy with Perfect Precision}
+\label{fig:a1_report}
 \end{figure}
 
 \subsection{Key Observations}
@@ -572,448 +307,134 @@ The goal is to understand the fundamental algorithms behind tree-based learning 
     \item Ensemble voting
 \end{itemize}
 
-\section{Code Implementation}
+\section{Code Implementation and Results}
 
-\subsection{1. Data Loading and Preprocessing}
+\subsection{1. Dataset Loading and Exploration}
 
-\begin{lstlisting}
-import pandas as pd
-import numpy as np
-import re
-from sklearn.model_selection import train_test_split
-
-# Load dataset
-df = pd.read_csv('../assignment-01/emails.csv')
-
-# Text preprocessing function
-def preprocess_text(text):
-    """Clean text: lowercase, remove punctuation"""
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z ]', '', text)
-    words = text.split()
-    return words
-
-# Manual stopwords list
-stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 
-             'at', 'to', 'for', 'of', 'with', 'by', 'from'}
-
-def remove_stopwords(words):
-    """Remove stopwords and short words"""
-    return [w for w in words if w not in stopwords and len(w) > 2]
-
-# Apply preprocessing
-df['words'] = df['text'].apply(preprocess_text)
-df['clean_words'] = df['words'].apply(remove_stopwords)
-\end{lstlisting}
-
-\subsection{2. Feature Extraction - Bag-of-Words (Manual Implementation)}
-
-\begin{lstlisting}
-# Split data
-y = df['spam'].values
-X_temp = df['clean_words'].values
-
-X_train_words, X_test_words, y_train, y_test = train_test_split(
-    X_temp, y, test_size=0.2, random_state=42
-)
-
-# Build vocabulary from training data ONLY
-vocab = set()
-for words_list in X_train_words:
-    vocab.update(words_list)
-
-vocab = sorted(list(vocab))
-word_to_idx = {word: idx for idx, word in enumerate(vocab)}
-
-# Convert text to bag-of-words vectors manually
-def text_to_bow_vector(words_list, vocab_dict):
-    """Convert words list to bag-of-words vector"""
-    vector = np.zeros(len(vocab_dict))
-    word_count = {}
-    for word in words_list:
-        word_count[word] = word_count.get(word, 0) + 1
-    
-    for word, count in word_count.items():
-        if word in vocab_dict:
-            vector[vocab_dict[word]] = count
-    return vector
-
-X_train = np.array([text_to_bow_vector(w, word_to_idx) 
-                    for w in X_train_words])
-X_test = np.array([text_to_bow_vector(w, word_to_idx) 
-                   for w in X_test_words])
-\end{lstlisting}
-
-\subsection{3. Decision Tree Classifier - From Scratch}
-
-\begin{lstlisting}
-class Node:
-    """A node in the decision tree"""
-    def __init__(self, feature=None, threshold=None, 
-                 left=None, right=None, value=None):
-        self.feature = feature
-        self.threshold = threshold
-        self.left = left
-        self.right = right
-        self.value = value
-
-class DecisionTree:
-    """Decision Tree Classifier - from scratch"""
-    
-    def __init__(self, max_depth=None, min_samples_split=2):
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.tree = None
-    
-    def _entropy(self, y):
-        """Calculate entropy of labels"""
-        counts = np.bincount(y)
-        probabilities = counts / len(y)
-        entropy = -np.sum([p * np.log2(p) 
-                          for p in probabilities if p > 0])
-        return entropy
-    
-    def _information_gain(self, parent, left_child, right_child):
-        """Calculate information gain from a split"""
-        n = len(parent)
-        n_left = len(left_child)
-        n_right = len(right_child)
-        
-        if n_left == 0 or n_right == 0:
-            return 0
-        
-        parent_entropy = self._entropy(parent)
-        left_entropy = self._entropy(left_child)
-        right_entropy = self._entropy(right_child)
-        
-        weighted_child_entropy = ((n_left / n) * left_entropy + 
-                                 (n_right / n) * right_entropy)
-        ig = parent_entropy - weighted_child_entropy
-        return ig
-    
-    def _best_split(self, X, y):
-        """Find the best feature and threshold to split on"""
-        best_gain = -1
-        best_feature = None
-        best_threshold = None
-        
-        for feature_idx in range(X.shape[1]):
-            feature_values = X[:, feature_idx]
-            thresholds = np.unique(feature_values)
-            
-            for threshold in thresholds:
-                left_mask = feature_values <= threshold
-                right_mask = ~left_mask
-                
-                if (np.sum(left_mask) < self.min_samples_split or 
-                    np.sum(right_mask) < self.min_samples_split):
-                    continue
-                
-                ig = self._information_gain(y, y[left_mask], y[right_mask])
-                
-                if ig > best_gain:
-                    best_gain = ig
-                    best_feature = feature_idx
-                    best_threshold = threshold
-        
-        return best_feature, best_threshold
-    
-    def fit(self, X, y):
-        """Build decision tree classifier"""
-        self.tree = self._build_tree(X, y)
-        return self
-    
-    def predict(self, X):
-        """Predict class labels for samples"""
-        return np.array([self._predict_sample(x, self.tree) 
-                        for x in X])
-\end{lstlisting}
-
-\textbf{Decision Tree Algorithm:}
-\begin{itemize}
-    \item \textbf{Entropy:} Measures impurity of a node
-    $$H(S) = -\sum p_i \log_2(p_i)$$
-    
-    \item \textbf{Information Gain:} Quality of a split
-    $$IG(S, A) = H(S) - \sum \frac{|S_v|}{|S|} H(S_v)$$
-    
-    \item \textbf{Best Split Selection:} Try all features and thresholds
-    \item \textbf{Recursive Building:} Build left and right subtrees
-    \item \textbf{Stopping Criteria:} Max depth, min samples, or pure nodes
-\end{itemize}
-
-\subsection{4. Random Forest Classifier - From Scratch}
-
-\begin{lstlisting}
-class RandomForest:
-    """Random Forest Classifier - from scratch"""
-    
-    def __init__(self, n_trees=10, max_depth=None, 
-                 min_samples_split=2, bootstrap=True):
-        self.n_trees = n_trees
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.bootstrap = bootstrap
-        self.trees = []
-    
-    def _bootstrap_sample(self, X, y):
-        """Create a bootstrap sample of the data"""
-        n_samples = X.shape[0]
-        indices = np.random.choice(n_samples, n_samples, replace=True)
-        return X[indices], y[indices]
-    
-    def fit(self, X, y):
-        """Build random forest"""
-        self.trees = []
-        for i in range(self.n_trees):
-            if self.bootstrap:
-                X_sample, y_sample = self._bootstrap_sample(X, y)
-            else:
-                X_sample, y_sample = X, y
-            
-            dt = DecisionTree(max_depth=self.max_depth, 
-                            min_samples_split=self.min_samples_split)
-            dt.fit(X_sample, y_sample)
-            self.trees.append(dt)
-        
-        return self
-    
-    def predict(self, X):
-        """Predict by majority voting"""
-        predictions = np.array([tree.predict(X) for tree in self.trees])
-        final_predictions = np.zeros(X.shape[0], dtype=int)
-        for i in range(X.shape[0]):
-            votes = predictions[:, i]
-            final_predictions[i] = np.bincount(votes).argmax()
-        
-        return final_predictions
-\end{lstlisting}
-
-\textbf{Random Forest Algorithm:}
-\begin{itemize}
-    \item \textbf{Bootstrap Sampling:} Create random samples with replacement
-    $$S_i = \text{Bootstrap}(S) \text{ for } i = 1 \text{ to } n\_trees$$
-    
-    \item \textbf{Tree Training:} Train independent decision trees
-    \item \textbf{Ensemble Prediction:} Majority voting
-    $$\text{Prediction} = \text{argmax}(\text{votes})$$
-\end{itemize}
-
-\subsection{5. Model Training}
-
-\begin{lstlisting}
-import time
-
-print("TRAINING MODELS")
-print("=" * 60)
-
-# Train Decision Tree
-print("\n1. Training Decision Tree Classifier...")
-start_time = time.time()
-dt_classifier = DecisionTree(max_depth=15, min_samples_split=2)
-dt_classifier.fit(X_train, y_train)
-dt_train_time = time.time() - start_time
-
-# Train Random Forest
-print("\n2. Training Random Forest Classifier...")
-start_time = time.time()
-rf_classifier = RandomForest(n_trees=10, max_depth=15, 
-                            min_samples_split=2, bootstrap=True)
-rf_classifier.fit(X_train, y_train)
-rf_train_time = time.time() - start_time
-
-print("Training complete!")
-\end{lstlisting}
-
-\subsection{6. Model Evaluation and Comparison}
-
-\begin{lstlisting}
-from sklearn.metrics import (accuracy_score, precision_score, 
-                            recall_score, f1_score, confusion_matrix)
-
-# Make predictions
-dt_pred = dt_classifier.predict(X_test)
-rf_pred = rf_classifier.predict(X_test)
-
-# Evaluate Decision Tree
-dt_accuracy = accuracy_score(y_test, dt_pred)
-dt_precision = precision_score(y_test, dt_pred, zero_division=0)
-dt_recall = recall_score(y_test, dt_pred, zero_division=0)
-dt_f1 = f1_score(y_test, dt_pred, zero_division=0)
-
-# Evaluate Random Forest
-rf_accuracy = accuracy_score(y_test, rf_pred)
-rf_precision = precision_score(y_test, rf_pred, zero_division=0)
-rf_recall = recall_score(y_test, rf_pred, zero_division=0)
-rf_f1 = f1_score(y_test, rf_pred, zero_division=0)
-\end{lstlisting}
-
-\section{Results - Assignment 02}
-
-\subsection{Dataset Overview}
-
-\begin{table}[H]
-\centering
-\caption{Assignment 02 Dataset Statistics}
-\begin{tabular}{|l|r|}
-\hline
-\textbf{Metric} & \textbf{Value} \\
-\hline
-Total Samples (Raw) & 10 \\
-Missing Values (NaN) & 7 in spam column \\
-Valid Samples & 3 after NaN removal \\
-Class Distribution & 2 Ham, 1 Spam \\
-Training Samples & 2 (66.7\%) \\
-Test Samples & 1 (33.3\%) \\
-Vocabulary Size & 10 unique words \\
-Feature Dimensionality & 10 \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Decision Tree Performance}
-
-\begin{table}[H]
-\centering
-\caption{Decision Tree Classifier Performance}
-\begin{tabular}{|l|r|}
-\hline
-\textbf{Metric} & \textbf{Value} \\
-\hline
-Accuracy & 0.0000 \\
-Precision & 0.0000 \\
-Recall & 0.0000 \\
-F1-Score & 0.0000 \\
-Training Time & 0.0003s \\
-Test Set Size & 1 sample \\
-\hline
-\end{tabular}
-\end{table}
-
-\textbf{Confusion Matrix (Decision Tree):}
-\begin{verbatim}
-                Predicted Ham    Predicted Spam
-Actual Ham           0                  0
-Actual Spam          1                  0
-\end{verbatim}
-
-\textbf{Note:} The 1-sample test set contains only a spam email. The model predicted ham (class 0), resulting in a false negative and 0\% accuracy.
-
-\subsection{Random Forest Performance}
-
-\begin{table}[H]
-\centering
-\caption{Random Forest Classifier Performance}
-\begin{tabular}{|l|r|}
-\hline
-\textbf{Metric} & \textbf{Value} \\
-\hline
-Accuracy & 0.0000 \\
-Precision & 0.0000 \\
-Recall & 0.0000 \\
-F1-Score & 0.0000 \\
-Training Time & 0.0006s \\
-Test Set Size & 1 sample \\
-Number of Trees & 5 \\
-\hline
-\end{tabular}
-\end{table}
-
-\textbf{Confusion Matrix (Random Forest):}
-\begin{verbatim}
-                Predicted Ham    Predicted Spam
-Actual Ham           0                  0
-Actual Spam          1                  0
-\end{verbatim}
-
-\textbf{Note:} Similar to Decision Tree, the single test sample (spam) was misclassified as ham by majority voting across 5 trees.
-
-\subsection{Performance Comparison}
-
-\begin{table}[H]
-\centering
-\caption{Decision Tree vs Random Forest - Detailed Comparison}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Metric} & \textbf{Decision Tree} & \textbf{Random Forest} & \textbf{Difference} \\
-\hline
-Accuracy & 0.0000 & 0.0000 & 0\% \\
-Precision & 0.0000 & 0.0000 & 0\% \\
-Recall & 0.0000 & 0.0000 & 0\% \\
-F1-Score & 0.0000 & 0.0000 & 0\% \\
-Training Time (s) & 0.0003 & 0.0006 & 2$\times$ \\
-Test Set Complexity & 1 sample & 1 sample & Same \\
-\hline
-\end{tabular}
-\end{table}
-
-\textbf{Observation:} Both models achieved identical performance due to the extremely small test set (n=1). With only one sample, minority class misclassification results in 100\% error rate regardless of algorithm complexity.
-
-\subsection{Visualizations - Assignment 02}
-
-% ============================================================================
-% GRAPH 4: Confusion Matrices Comparison
-% ============================================================================
 \begin{figure}[H]
 \centering
-\fbox{\begin{minipage}{0.8\linewidth}
-    \textbf{GRAPH 4: Confusion Matrices - Decision Tree vs Random Forest}\\
-    \vspace{4cm}
-    \% INSERT: Side-by-side confusion matrices for both models \\
-    \% File: assignment-02/confusion_matrices_comparison.png
-    \vspace{0.5cm}
-\end{minipage}}
-\caption{Confusion Matrices Comparison - Assignment 02}
-\label{fig:a2_confusion}
+\includegraphics[width=0.9\textwidth]{assignment-02-01.png}
+\caption{Dataset Overview - Shape (10, 2), Data Info, Spam Distribution, and Missing Values Analysis}
+\label{fig:a2_dataset}
 \end{figure}
 
-% ============================================================================
-% GRAPH 5: Performance Metrics Comparison
-% ============================================================================
+\subsection{2. Data Preprocessing and NaN Handling}
+
 \begin{figure}[H]
 \centering
-\fbox{\begin{minipage}{0.8\linewidth}
-    \textbf{GRAPH 5: Performance Metrics Bar Chart}\\
-    \vspace{4cm}
-    \% INSERT: Bar chart comparing accuracy, precision, recall, F1-score \\
-    \% File: assignment-02/performance_comparison.png
-    \vspace{0.5cm}
-\end{minipage}}
-\caption{Model Performance Metrics Comparison}
+\includegraphics[width=0.9\textwidth]{assignment-02-02.png}
+\caption{Data Preprocessing Output - Original Data with 7 NaN Values, After Removal: 3 Valid Samples, Train-Test Split with Stratification Warning}
+\label{fig:a2_preprocessing}
+\end{figure}
+
+\subsection{3. Feature Extraction and Model Training}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-03.png}
+\caption{Bag-of-Words Feature Extraction - Vocabulary Size 10, Training Set 2 Samples, Test Set 1 Sample, Feature Matrix Shape}
+\label{fig:a2_features}
+\end{figure}
+
+\subsection{4. Model Evaluation - Performance Metrics}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-04.png}
+\caption{Decision Tree and Random Forest Evaluation - Classification Reports and Metrics (0.0000 Accuracy, Test Set: 1 Sample)}
 \label{fig:a2_metrics}
 \end{figure}
 
-% ============================================================================
-% GRAPH 6: Test Set Class Distribution
-% ============================================================================
+\subsection{5. Confusion Matrices Visualization}
+
 \begin{figure}[H]
 \centering
-\fbox{\begin{minipage}{0.8\linewidth}
-    \textbf{GRAPH 6: Test Set Class Distribution}\\
-    \vspace{4cm}
-    \% INSERT: Pie chart showing Ham vs Spam in test set \\
-    \% File: assignment-02/test_set_distribution.png
-    \vspace{0.5cm}
-\end{minipage}}
-\caption{Test Set Class Distribution}
-\label{fig:a2_distribution}
+\includegraphics[width=0.9\textwidth]{assignment-02-05.png}
+\caption{Side-by-Side Confusion Matrices - Decision Tree (Blue) vs Random Forest (Green) - Both Predict Ham for Single Test Sample}
+\label{fig:a2_confusion}
 \end{figure}
 
-% ============================================================================
-% GRAPH 7: Accuracy vs Training Time Trade-off
-% ============================================================================
+\subsection{6. Performance Comparison Chart}
+
 \begin{figure}[H]
 \centering
-\fbox{\begin{minipage}{0.8\linewidth}
-    \textbf{GRAPH 7: Accuracy vs Training Time}\\
-    \vspace{4cm}
-    \% INSERT: Dual-axis plot showing accuracy bars and training time line \\
-    \% File: assignment-02/accuracy_vs_time.png
-    \vspace{0.5cm}
-\end{minipage}}
-\caption{Accuracy vs Training Time Trade-off Analysis}
+\includegraphics[width=0.9\textwidth]{assignment-02-06.png}
+\caption{Model Performance Comparison - All Metrics at 0.0000 Due to Single-Sample Test Set}
+\label{fig:a2_comparison}
+\end{figure}
+
+\subsection{7. Model Training Output}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-07.png}
+\caption{Training Models - Decision Tree (0.0003s) and Random Forest (0.0006s) Training Time}
+\label{fig:a2_training}
+\end{figure}
+
+\subsection{8. Performance Evaluation Metrics}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-08.png}
+\caption{Decision Tree and Random Forest Evaluation - Accuracy, Precision, Recall, F1-Score, and Confusion Matrix}
+\label{fig:a2_eval}
+\end{figure}
+
+\subsection{9. Performance Comparison DataFrame}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-09.png}
+\caption{Performance Comparison Table - Decision Tree vs Random Forest Metrics (All 0.0000)}
+\label{fig:a2_comparison_table}
+\end{figure}
+
+\subsection{10. Confusion Matrix Heatmaps}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-10.png}
+\caption{Confusion Matrix Visualizations - Decision Tree (Blue) and Random Forest (Green) Side-by-Side}
+\label{fig:a2_cm_visual}
+\end{figure}
+
+\subsection{11. Performance Metrics Bar Chart}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-11.png}
+\caption{Bar Chart - Model Performance Metrics Comparison (Accuracy, Precision, Recall, F1-Score)}
+\label{fig:a2_bar_chart}
+\end{figure}
+
+\subsection{12. Test Set Class Distribution}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-12.png}
+\caption{Test Set Class Distribution - Single Sample with Warning (Only 1 Class Present)}
+\label{fig:a2_test_dist}
+\end{figure}
+
+\subsection{13. Accuracy vs Training Time Trade-off}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-13.png}
+\caption{Dual-Axis Chart - Accuracy (Bars) vs Training Time (Line) Trade-off Analysis}
 \label{fig:a2_tradeoff}
 \end{figure}
+
+\subsection{14. Summary and Key Metrics Table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{assignment-02-14.png}
+\caption{Final Summary - Performance Comparison Table with Training Times and N/A Improvements}
+\label{fig:a2_summary}
+\end{figure}
+
 
 \subsection{Key Findings}
 
