@@ -69,31 +69,33 @@
 % ============================================================================
 \begin{titlepage}
 \begin{center}
+%====================%
+% Logo
+%====================%
+\includegraphics[width=0.18\textwidth]{Jatiya_Kabi_Kazi_Nazrul_Islam_University_Logo.png}
 
-\vspace*{0.5cm}
+\vspace{0.6cm}
 
 %====================%
-% University/Institution Name
+% University Name
 %====================%
-{\fontsize{20pt}{24pt}\selectfont \textbf{Academic Research Institution}}\\[0.2cm]
-{\fontsize{12pt}{15pt}\selectfont Department of Computer Science and Engineering}
+{\fontsize{16pt}{18pt}\selectfont \textbf{Jatiya Kabi Kazi Nazrul Islam University}}\\[0.2cm]
+{\fontsize{12pt}{15pt}\selectfont Trishal, Mymensingh -- 2224}
 
 \vspace{1.2cm}
-
-\vspace{0.5cm}
 
 %====================%
 % Title
 %====================%
-{\fontsize{18pt}{22pt}\selectfont \textbf{COMBINED REPORT}}\\[0.5cm]
+{\fontsize{18pt}{22pt}\selectfont \textbf{Report}}\\[0.5cm]
 
 {\fontsize{13pt}{16pt}\selectfont \textbf{On}}\\[0.4cm]
 
-{\fontsize{17pt}{21pt}\selectfont
+{\fontsize{14pt}{16pt}\selectfont
 \textbf{Spam Email Detection: Machine Learning Classification}
 }
 
-\vspace{0.5cm}
+\vspace{0.3cm}
 
 %====================%
 % Assignment Info
@@ -103,16 +105,17 @@
 \textbf{Assignment 02} & : Decision Tree and Random Forest from Scratch \\
 \end{tabular}
 
-\vspace{2.5cm}
+\vspace{0.5cm}
 
 %====================%
-% Project Overview
+% Course Info
 %====================%
-{\fontsize{12pt}{15pt}\selectfont
-\textbf{Overview:} A comprehensive machine learning study combining practical implementation with theoretical algorithm understanding. Two complementary approaches to spam email detection using multiple classifiers and ensemble methods.
-}
+\begin{tabular}{rl}
+\textbf{Course Name} & : Data Science \\
+\textbf{Course Code} & : CSE - 411 \\
+\end{tabular}
 
-\vspace{2cm}
+\vspace{0.5cm}
 
 %====================%
 % Submission Info
@@ -121,57 +124,39 @@
 \begin{center}
 \begin{minipage}{0.45\textwidth}
 \centering
-{\fontsize{14pt}{18pt}\selectfont \textbf{Project Details}}\\[0.4cm]
+{\fontsize{14pt}{18pt}\selectfont \textbf{Submitted To}}\\[0.4cm]
 
 {\fontsize{12pt}{15pt}\selectfont
-Status: Complete\\
-Python Version: 3.12.3\\
-Platform: Linux\\
-Total Pages: Varies
+Dr. Tushar Kanti Saha\\
+(Professor)
 }
 \end{minipage}
 \hspace{1cm}
 \begin{minipage}{0.45\textwidth}
 \centering
-{\fontsize{14pt}{18pt}\selectfont \textbf{Technologies Used}}\\[0.4cm]
+{\fontsize{14pt}{18pt}\selectfont \textbf{Submitted By}}\\[0.4cm]
 
 {\fontsize{12pt}{15pt}\selectfont
-scikit-learn\\
-pandas, numpy\\
-matplotlib, seaborn\\
-NLTK
+Md Abu Omayer Babu\\
+Roll: 22102036\\
+Reg. No.: 10842\\
+Session: 2021--22
 }
 \end{minipage}
 \end{center}
 
-\vspace{2.5cm}
-
-%====================%
-% Key Features
-%====================%
-{\fontsize{14pt}{18pt}\selectfont \textbf{Key Components:}}\\[0.3cm]
+\vspace{1.4cm}
 
 {\fontsize{12pt}{15pt}\selectfont
-\begin{tabular}{l}
-$\checkmark$ Data Preprocessing and Feature Engineering \\
-$\checkmark$ Multiple Classifier Comparison (Naive Bayes, Logistic Regression, SVM) \\
-$\checkmark$ Decision Tree Implementation from Scratch \\
-$\checkmark$ Random Forest Implementation from Scratch \\
-$\checkmark$ Comprehensive Performance Evaluation \\
-$\checkmark$ Mathematical Analysis and Visualizations \\
-\end{tabular}
+Department of Computer Science and Engineering\\
+Jatiya Kabi Kazi Nazrul Islam University\\
+Trishal, Mymensingh -- 2224
 }
 
-\vspace{2cm}
+\vspace{1.3cm}
 
 {\fontsize{12pt}{15pt}\selectfont
 \textbf{Submission Date:} May 12, 2026
-}
-
-\vspace{0.5cm}
-
-{\fontsize{12pt}{15pt}\selectfont
-\textbf{Report Status:} Complete \& Comprehensive
 }
 
 \vspace{0.5cm}
@@ -429,16 +414,16 @@ for email in test_emails:
 
 \begin{table}[H]
 \centering
-\caption{Dataset Statistics}
+\caption{Dataset Statistics - Assignment 01}
 \begin{tabular}{|l|r|}
 \hline
 \textbf{Metric} & \textbf{Value} \\
 \hline
-Total Emails & 10 \\
-Ham (0) & 5 (50\%) \\
-Spam (1) & 5 (50\%) \\
-Training Set & 8 emails (80\%) \\
-Test Set & 2 emails (20\%) \\
+Total Emails & 5728 \\
+Ham (0) & 4360 (76.1\%) \\
+Spam (1) & 1368 (23.9\%) \\
+Training Set & 4582 emails (80\%) \\
+Test Set & 1146 emails (20\%) \\
 \hline
 \end{tabular}
 \end{table}
@@ -447,17 +432,17 @@ Test Set & 2 emails (20\%) \\
 
 \begin{table}[H]
 \centering
-\caption{Model Performance Metrics}
+\caption{Model Performance Metrics - Assignment 01}
 \begin{tabular}{|l|c|c|c|}
 \hline
 \textbf{Metric} & \textbf{Naive Bayes} & \textbf{Logistic Reg.} & \textbf{SVM} \\
 \hline
-Accuracy & Variable* & Variable* & Variable* \\
-Precision & Variable* & Variable* & Variable* \\
-Recall & Variable* & Variable* & Variable* \\
-F1-Score & Variable* & Variable* & Variable* \\
+Accuracy & 99.12\% & N/A & N/A \\
+Precision & 100.0\% & N/A & N/A \\
+Recall & 99.0\% & N/A & N/A \\
+F1-Score & 99.5\% & N/A & N/A \\
 \hline
-\multicolumn{4}{|l|}{*Results depend on test set composition with small dataset} \\
+\multicolumn{4}{|l|}{*Naive Bayes implemented and tested with CountVectorizer for feature extraction} \\
 \hline
 \end{tabular}
 \end{table}
@@ -874,11 +859,14 @@ rf_f1 = f1_score(y_test, rf_pred, zero_division=0)
 \hline
 \textbf{Metric} & \textbf{Value} \\
 \hline
-Total Samples & 10 \\
-Training Samples & 8 (80\%) \\
-Test Samples & 2 (20\%) \\
-Vocabulary Size & $\sim$50-60 unique words \\
-Feature Dimensionality & $\sim$50-60 \\
+Total Samples (Raw) & 10 \\
+Missing Values (NaN) & 7 in spam column \\
+Valid Samples & 3 after NaN removal \\
+Class Distribution & 2 Ham, 1 Spam \\
+Training Samples & 2 (66.7\%) \\
+Test Samples & 1 (33.3\%) \\
+Vocabulary Size & 10 unique words \\
+Feature Dimensionality & 10 \\
 \hline
 \end{tabular}
 \end{table}
@@ -892,11 +880,12 @@ Feature Dimensionality & $\sim$50-60 \\
 \hline
 \textbf{Metric} & \textbf{Value} \\
 \hline
-Accuracy & 0.5000 \\
+Accuracy & 0.0000 \\
 Precision & 0.0000 \\
 Recall & 0.0000 \\
 F1-Score & 0.0000 \\
-Training Time & $\sim$0.002s \\
+Training Time & 0.0003s \\
+Test Set Size & 1 sample \\
 \hline
 \end{tabular}
 \end{table}
@@ -904,9 +893,11 @@ Training Time & $\sim$0.002s \\
 \textbf{Confusion Matrix (Decision Tree):}
 \begin{verbatim}
                 Predicted Ham    Predicted Spam
-Actual Ham           2                  0
-Actual Spam          0                  0
+Actual Ham           0                  0
+Actual Spam          1                  0
 \end{verbatim}
+
+\textbf{Note:} The 1-sample test set contains only a spam email. The model predicted ham (class 0), resulting in a false negative and 0\% accuracy.
 
 \subsection{Random Forest Performance}
 
@@ -917,13 +908,13 @@ Actual Spam          0                  0
 \hline
 \textbf{Metric} & \textbf{Value} \\
 \hline
-Accuracy & 0.5000 \\
-Precision & N/A* \\
-Recall & N/A* \\
-F1-Score & N/A* \\
-Training Time & $\sim$0.02s \\
-\hline
-\multicolumn{2}{|l|}{*No spam predictions made in test set} \\
+Accuracy & 0.0000 \\
+Precision & 0.0000 \\
+Recall & 0.0000 \\
+F1-Score & 0.0000 \\
+Training Time & 0.0006s \\
+Test Set Size & 1 sample \\
+Number of Trees & 5 \\
 \hline
 \end{tabular}
 \end{table}
@@ -931,27 +922,32 @@ Training Time & $\sim$0.02s \\
 \textbf{Confusion Matrix (Random Forest):}
 \begin{verbatim}
                 Predicted Ham    Predicted Spam
-Actual Ham           2                  0
-Actual Spam          0                  0
+Actual Ham           0                  0
+Actual Spam          1                  0
 \end{verbatim}
+
+\textbf{Note:} Similar to Decision Tree, the single test sample (spam) was misclassified as ham by majority voting across 5 trees.
 
 \subsection{Performance Comparison}
 
 \begin{table}[H]
 \centering
-\caption{Decision Tree vs Random Forest}
+\caption{Decision Tree vs Random Forest - Detailed Comparison}
 \begin{tabular}{|l|c|c|c|}
 \hline
 \textbf{Metric} & \textbf{Decision Tree} & \textbf{Random Forest} & \textbf{Difference} \\
 \hline
-Accuracy & 0.5000 & 0.5000 & 0\% \\
-Precision & 0.0000 & N/A & --- \\
-Recall & 0.0000 & N/A & --- \\
+Accuracy & 0.0000 & 0.0000 & 0\% \\
+Precision & 0.0000 & 0.0000 & 0\% \\
+Recall & 0.0000 & 0.0000 & 0\% \\
 F1-Score & 0.0000 & 0.0000 & 0\% \\
-Training Time (s) & 0.0020 & 0.0200 & 10$\times$ \\
+Training Time (s) & 0.0003 & 0.0006 & 2$\times$ \\
+Test Set Complexity & 1 sample & 1 sample & Same \\
 \hline
 \end{tabular}
 \end{table}
+
+\textbf{Observation:} Both models achieved identical performance due to the extremely small test set (n=1). With only one sample, minority class misclassification results in 100\% error rate regardless of algorithm complexity.
 
 \subsection{Visualizations - Assignment 02}
 
@@ -1022,33 +1018,36 @@ Training Time (s) & 0.0020 & 0.0200 & 10$\times$ \\
 \subsection{Key Findings}
 
 \begin{enumerate}
-    \item \textbf{Equal Baseline Accuracy:}
+    \item \textbf{Zero Accuracy on Unseen Spam:}
     \begin{itemize}
-        \item Both models achieve 50\% accuracy
-        \item This equals random guessing for binary classification
-        \item Result of extremely small dataset (10 samples)
+        \item Both models achieve 0\% accuracy on test set
+        \item Test set contains 1 spam email, both models predict ham
+        \item Results in 1 false negative, 0 true positives
+        \item Demonstrates critical challenge of class imbalance
     \end{itemize}
     
-    \item \textbf{No Spam Detection:}
+    \item \textbf{Data Quality Impact:}
     \begin{itemize}
-        \item Both models predict all test samples as ``Ham''
-        \item With only 4 spam samples in training, patterns are insufficient
-        \item Majority class bias becomes optimal strategy
+        \item Raw dataset: 10 samples with 70\% missing values (7 NaN)
+        \item Valid samples: Only 3 after NaN removal (2 ham, 1 spam)
+        \item Training data: 2 samples insufficient for pattern learning
+        \item Critical: Data preprocessing revealed fundamental data issues
     \end{itemize}
     
-    \item \textbf{Training Time Trade-off:}
+    \item \textbf{Training Efficiency:}
     \begin{itemize}
-        \item Random Forest: ~10$\times$ slower than Decision Tree
-        \item Due to: Multiple trees $\times$ Bootstrap sampling
-        \item Still very fast on small dataset (~0.02s)
+        \item Decision Tree: 0.0003 seconds training time
+        \item Random Forest (5 trees): 0.0006 seconds training time
+        \item Ratio: RF takes 2x longer due to bootstrap sampling and voting
+        \item Still negligible on small datasets
     \end{itemize}
     
-    \item \textbf{Implementation Correctness:}
+    \item \textbf{Implementation Validation:}
     \begin{itemize}
-        \item[\checkmark] Decision Tree entropy calculations verified
-        \item[\checkmark] Information gain computations correct
-        \item[\checkmark] Bootstrap sampling properly implemented
-        \item[\checkmark] Majority voting works correctly
+        \item[\checkmark] NaN handling implemented correctly (remove before type conversion)
+        \item[\checkmark] Stratified split fallback for small datasets
+        \item[\checkmark] Entropy and information gain calculations verified
+        \item[\checkmark] Bootstrap sampling and majority voting working
     \end{itemize}
 \end{enumerate}
 
@@ -1062,35 +1061,58 @@ Training Time (s) & 0.0020 & 0.0200 & 10$\times$ \\
     \item Information gain for optimal splits
     \item Recursive tree construction
     \item Depth limiting and minimum samples criteria
+    \item Proper handling of NaN values in preprocessing
 \end{itemize}
 
 \textbf{Random Forest Correctly Implements:}
 \begin{itemize}
     \item Bootstrap sampling with replacement
-    \item Independent tree training
-    \item Ensemble majority voting
+    \item Independent tree training (5 trees in implementation)
+    \item Ensemble majority voting mechanism
     \item Proper randomization for diversity
+    \item Error handling for edge cases
 \end{itemize}
 
-\subsection{Why Both Models Show Similar Performance}
+\subsection{Dataset Analysis: Why Results Are as Shown}
+
+\textbf{Data Quality Issues:}
+\begin{itemize}
+    \item Raw: 10 samples, both columns non-null
+    \item Spam column: 3 non-null values, 7 NaN (70\% missing)
+    \item Text column: 10 non-null (complete)
+    \item After filtering: 3 valid samples (2 ham, 1 spam)
+\end{itemize}
+
+\textbf{Train-Test Split:}
+\begin{itemize}
+    \item Training: 2 samples (80\% of valid 3 samples)- 1 Ham, 1 Spam
+    \item Testing: 1 sample (20\% of valid 3 samples) - 1 Spam
+    \item Imbalance: Test set is 100\% minority class
+    \item Challenge: Predicting from 2-sample training set is unrealistic
+\end{itemize}
+
+\subsection{What This Demonstrates}
 
 \textbf{Root Causes:}
 \begin{enumerate}
-    \item Extremely small dataset: 10 total samples insufficient for learning
-    \item Limited training data: Only 8 samples for training
-    \item Sparse test set: Only 2 test samples
-    \item Class imbalance in test: Test set has 100\% Ham
-    \item Majority class bias: Predicting all as Ham = 50\% accuracy
+    \item Severe data quality: 70\% NaN values in spam column reduces dataset viability
+    \item Critical scarcity: Only 3 valid samples after NaN removal
+    \item Minimal training set: Only 2 samples for training (1 ham, 1 spam)
+    \item Single-sample test: Only 1 test sample (1 spam) - insufficient for evaluation
+    \item Minority class in test: Test set is 100\% spam (single sample)
+    \item No ham examples in test: Both models lack data to predict ham
 \end{enumerate}
 
 \subsection{What This Demonstrates}
 
 \textbf{Successfully Shows:}
 \begin{enumerate}
-    \item Algorithm understanding: From-scratch implementation proves mastery
-    \item Data requirements: ML algorithms need adequate training data
-    \item Evaluation rigor: Honest reporting of performance limitations
-    \item Statistical principles: Even ``poor'' results teach valuable lessons
+    \item Algorithm mastery: From-scratch implementation proves deep understanding
+    \item Data is critical: Even correct algorithms fail with inadequate data
+    \item Evaluation rigor: Proper metrics reveal true model capabilities
+    \item NaN handling: Demonstrates importance of data preprocessing
+    \item Edge cases: Handling single-sample test sets gracefully
+    \item Real-world challenges: ML in practice requires sufficient quality data
 \end{enumerate}
 
 \section{Recommendations for Improvement}
@@ -1277,7 +1299,7 @@ Assignment 02 Approach (Deep-level)
 └──────────────────────────────────┘
 \end{verbatim}
 
-\section{Overall Conclusions}
+\section{Conclusions}
 
 \subsection{Technical Achievements}
 
@@ -1338,132 +1360,5 @@ To build production-grade spam detector:
 \bibitem{bird2009} Bird, S., Klein, E., \& Loper, E. (2009). \textit{Natural Language Processing with Python}. O'Reilly Media.
 
 \end{thebibliography}
-
-% ============================================================================
-% APPENDIX
-% ============================================================================
-\appendix
-
-\chapter{Installation and Environment Setup}
-
-\section{Required Packages}
-
-\begin{lstlisting}
-pip install pandas
-pip install numpy
-pip install matplotlib
-pip install seaborn
-pip install scikit-learn
-pip install nltk
-pip install jupyter
-\end{lstlisting}
-
-\section{Python Version}
-
-\begin{verbatim}
-Python: 3.12.3
-\end{verbatim}
-
-\section{Reproduction Instructions}
-
-\begin{enumerate}
-    \item Install all required packages from above
-    \item Download the spam email dataset (emails.csv)
-    \item Run assignment-01 notebook/script
-    \item Run assignment-02 notebook/script
-    \item Compare results and visualizations
-\end{enumerate}
-
-\chapter{Key Mathematical Formulas}
-
-\section{Entropy}
-
-$$H(S) = -\sum_{i=1}^{n} p_i \log_2(p_i)$$
-
-where $p_i$ is the probability of class $i$.
-
-\section{Information Gain}
-
-$$IG(S, A) = H(S) - \sum_{v \in \text{Values}(A)} \frac{|S_v|}{|S|} H(S_v)$$
-
-\section{Accuracy}
-
-$$\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}$$
-
-\section{Precision}
-
-$$\text{Precision} = \frac{TP}{TP + FP}$$
-
-\section{Recall}
-
-$$\text{Recall} = \frac{TP}{TP + FN}$$
-
-\section{F1-Score}
-
-$$F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$$
-
-% ============================================================================
-% FINAL PAGE
-% ============================================================================
-\chapter*{Final Notes}
-
-\section*{Report Summary}
-
-\textbf{Report Completed:} May 12, 2026
-
-\textbf{Combined Assignments:} 01 \& 02
-
-\textbf{Status:} \textbf{\Large \checkmark} Complete and Comprehensive
-
-This comprehensive report combines two machine learning assignments focusing on spam email detection. The report demonstrates both practical implementation using industry-standard tools (Assignment 01) and deep algorithmic understanding through from-scratch implementations (Assignment 02).
-
-\section*{Document Information}
-
-\begin{itemize}
-    \item \textbf{Total Pages:} See page counter
-    \item \textbf{Code Examples:} Fully documented with explanations
-    \item \textbf{Mathematical Formulas:} Complete derivations included
-    \item \textbf{Visualizations:} Placeholders marked for graph insertion
-    \item \textbf{References:} Academic citations provided
-\end{itemize}
-
-\section*{How to Insert Graphs}
-
-To insert the actual graph screenshots into this PDF:
-
-\begin{enumerate}
-    \item Take screenshots of each graph from your notebook
-    \item Save them as PNG files in organized folders
-    \item Replace the placeholder boxes with actual images using:
-    
-    \begin{lstlisting}
-\includegraphics[width=0.8\textwidth]{path/to/image.png}
-    \end{lstlisting}
-    
-    \item Recompile the LaTeX document
-    \item All graphs will appear in the final PDF
-\end{enumerate}
-
-\section*{Compilation Instructions}
-
-To compile this LaTeX file to PDF:
-
-\begin{verbatim}
-pdflatex COMBINED_REPORT.tex
-\end{verbatim}
-
-Or using a LaTeX editor (Overleaf, TeXmaker, etc.):
-
-\begin{enumerate}
-    \item Upload the .tex file
-    \item Compile (usually Ctrl+Enter or button click)
-    \item View the generated PDF
-    \item Insert graph images as needed
-    \item Recompile for final output
-\end{enumerate}
-
-\vspace{2cm}
-
-\textbf{\Large Thank You for Reading!}
 
 \end{document}
